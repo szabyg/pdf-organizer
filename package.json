@@ -28,6 +28,9 @@
     "wait-on": "^8.0.3"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.0.2",
     "electron-store": "^10.0.1",
     "pdfjs-dist": "^2.16.105",
     "react": "^19.1.0",
