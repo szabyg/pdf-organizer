@@ -8,7 +8,8 @@
     "dev:main": "tsc --project tsconfig.main.json --watch",
     "dev:renderer": "vite --config vite.config.ts",
     "electron": "wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
-    "build:main": "tsc --project tsconfig.main.json"
+    "build:main": "tsc --project tsconfig.main.json",
+    "tsc:check": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -31,7 +32,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.0.2",
-    "electron-store": "^10.0.1",
+    "electron-store": "^8.2.0",
     "pdfjs-dist": "^2.16.105",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
