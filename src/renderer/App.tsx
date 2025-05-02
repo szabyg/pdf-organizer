@@ -115,9 +115,29 @@ export const App = () => {
         >
           {pdfs.length > 0 && (
             <>
-              <Typography variant="subtitle1">
-                File {current + 1} of {pdfs.length}
-              </Typography>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="subtitle1">
+                  File {current + 1} of {pdfs.length}
+                </Typography>
+                <Box display="flex" gap={1}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setCurrent((c) => Math.max(0, c - 1))}
+                    disabled={current === 0}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setCurrent((c) => Math.min(pdfs.length - 1, c + 1))}
+                    disabled={current >= pdfs.length - 1}
+                  >
+                    Next
+                  </Button>
+                </Box>
+              </Box>
 
               <TextField
                 label="New File Name"
