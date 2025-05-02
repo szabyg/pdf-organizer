@@ -1,25 +1,55 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Button, TextField, Typography, Paper, Divider } from '@mui/material'
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  Divider,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from '@mui/material'
 import { PdfViewer } from './components/PdfViewer'
+
+type FolderLoadResult = {
+  folderPath: string
+  pdfs: string[]
+  folders: string[]
+}
 
 export const App = () => {
   const [pdfs, setPdfs] = useState<string[]>([])
   const [current, setCurrent] = useState(0)
+  const [subfolders, setSubfolders] = useState<string[]>([])
+  const [folderPath, setFolderPath] = useState<string | null>(null)
+
   const [newName, setNewName] = useState('')
   const [targetFolder, setTargetFolder] = useState('')
 
   const handleSelectFolder = async () => {
-    const files = await window.electronAPI.selectFolder()
-    setPdfs(files)
+    const result: FolderLoadResult | null = await window.electronAPI.selectFolder()
+    if (!result) return
+
+    setFolderPath(result.folderPath)
+    setPdfs(result.pdfs)
+    setSubfolders(result.folders)
+    setTargetFolder(result.folders[0] || '')
     setCurrent(0)
+    setNewName('') // Reset on folder change
   }
 
   const loadLastFolder = async () => {
-    const files = await window.electronAPI.getLastFolder()
-    if (files.length > 0) {
-      setPdfs(files)
-      setCurrent(0)
-    }
+    const result: FolderLoadResult | null = await window.electronAPI.getLastFolder()
+    if (!result) return
+
+    setFolderPath(result.folderPath)
+    setPdfs(result.pdfs)
+    setSubfolders(result.folders)
+    setTargetFolder(result.folders[0] || '')
+    setCurrent(0)
+    setNewName('')
   }
 
   useEffect(() => {
@@ -27,25 +57,27 @@ export const App = () => {
   }, [])
 
   const handleSubmit = () => {
-    console.log('Rename to:', newName)
-    console.log('Move to folder:', targetFolder)
+    const originalPath = pdfs[current]
+    const newPath = `${folderPath}\\${targetFolder}\\${newName}.pdf`
+    console.log('Should move:', originalPath)
+    console.log('To:', newPath)
+    // ⏳ Replace with actual IPC call to move the file in main.ts
   }
 
   return (
     <Box display="flex" flexDirection="column" height="100vh">
-      {/* Top bar */}
+      {/* Top Bar */}
       <Box p={2} borderBottom={1} borderColor="divider">
         <Button variant="contained" onClick={handleSelectFolder}>
           Select Folder
         </Button>
       </Box>
 
-      {/* Main layout */}
+      {/* Main Layout */}
       <Box display="flex" flex="1" overflow="hidden">
-        {/* Left form panel */}
+        {/* Sidebar Form */}
         <Box
           component={Paper}
-          elevation={2}
           width={320}
           p={2}
           display="flex"
@@ -53,7 +85,6 @@ export const App = () => {
           gap={2}
           borderRight={1}
           borderColor="divider"
-          overflow="auto"
         >
           {pdfs.length > 0 && (
             <>
@@ -63,30 +94,47 @@ export const App = () => {
 
               <TextField
                 label="New File Name"
+                fullWidth
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                fullWidth
               />
 
-              <TextField
-                label="Target Folder"
-                value={targetFolder}
-                onChange={(e) => setTargetFolder(e.target.value)}
-                fullWidth
-              />
+              <FormControl fullWidth>
+                <InputLabel id="target-folder-label">Target Folder</InputLabel>
+                <Select
+                  labelId="target-folder-label"
+                  value={targetFolder}
+                  onChange={(e) => setTargetFolder(e.target.value)}
+                  label="Target Folder"
+                >
+                  {subfolders.map((folder) => (
+                    <MenuItem key={folder} value={folder}>
+                      {folder}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
               <Divider />
 
-              <Button variant="contained" color="primary" onClick={handleSubmit}>
-                Rename and Move
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!newName || !targetFolder}
+              >
+                Rename & Move
               </Button>
             </>
           )}
         </Box>
 
-        {/* Right viewer panel */}
+        {/* PDF Viewer Panel */}
         <Box flex={1} overflow="auto" p={2}>
-          {pdfs.length > 0 && <PdfViewer filePath={pdfs[current]} />}
+          {pdfs.length > 0 ? (
+            <PdfViewer filePath={pdfs[current]} />
+          ) : (
+            <Typography variant="body1">No PDF selected.</Typography>
+          )}
         </Box>
       </Box>
     </Box>

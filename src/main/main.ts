@@ -45,32 +45,43 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('dialog:selectFolder', async () => {
   const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
-
-  if (result.canceled || result.filePaths.length === 0) {
-    return []
-  }
+  if (result.canceled || result.filePaths.length === 0) return null
 
   const selectedPath = result.filePaths[0]
   store.set('lastFolder', selectedPath)
 
-  const files = fs.readdirSync(selectedPath)
-  const pdfs = files
-    .filter((file) => file.toLowerCase().endsWith('.pdf'))
-    .map((file) => path.join(selectedPath, file))
+  const entries = fs.readdirSync(selectedPath, { withFileTypes: true })
 
-  return pdfs
+  const pdfs = entries
+    .filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.pdf'))
+    .map((e) => path.join(selectedPath, e.name))
+
+  const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name)
+
+  return {
+    folderPath: selectedPath,
+    pdfs,
+    folders,
+  }
 })
 
 ipcMain.handle('get-last-folder', async () => {
-  const lastPath = store.get('lastFolder') as string | undefined
-  if (!lastPath || !fs.existsSync(lastPath)) return []
+  const lastPath = store.get('lastFolder')
+  if (!lastPath || !fs.existsSync(lastPath)) return null
 
-  const files = fs.readdirSync(lastPath)
-  const pdfs = files
-    .filter((file) => file.toLowerCase().endsWith('.pdf'))
-    .map((file) => path.join(lastPath, file))
+  const entries = fs.readdirSync(lastPath, { withFileTypes: true })
 
-  return pdfs
+  const pdfs = entries
+    .filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.pdf'))
+    .map((e) => path.join(lastPath, e.name))
+
+  const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name)
+
+  return {
+    folderPath: lastPath,
+    pdfs,
+    folders,
+  }
 })
 
 ipcMain.handle('load-pdf-buffer', async (_, filePath: string) => {
