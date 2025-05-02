@@ -2,8 +2,16 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import * as path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import Store from 'electron-store'
+import ElectronStore from 'electron-store'
 
 const isDev = process.env.NODE_ENV === 'development'
+
+type StoreSchema = {
+  lastFolder: string
+}
+
+const store: ElectronStore<StoreSchema> = new Store<StoreSchema>()
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -36,19 +44,31 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.handle('dialog:selectFolder', async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ['openDirectory'],
-  })
+  const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
 
   if (result.canceled || result.filePaths.length === 0) {
     return []
   }
 
   const selectedPath = result.filePaths[0]
+  store.set('lastFolder', selectedPath)
+
   const files = fs.readdirSync(selectedPath)
   const pdfs = files
     .filter((file) => file.toLowerCase().endsWith('.pdf'))
     .map((file) => path.join(selectedPath, file))
+
+  return pdfs
+})
+
+ipcMain.handle('get-last-folder', async () => {
+  const lastPath = store.get('lastFolder') as string | undefined
+  if (!lastPath || !fs.existsSync(lastPath)) return []
+
+  const files = fs.readdirSync(lastPath)
+  const pdfs = files
+    .filter((file) => file.toLowerCase().endsWith('.pdf'))
+    .map((file) => path.join(lastPath, file))
 
   return pdfs
 })
