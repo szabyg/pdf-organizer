@@ -102,3 +102,24 @@ ipcMain.handle('load-pdf-buffer', async (_, filePath: string) => {
 ipcMain.handle('get-filename', (_, filePath: string) => {
   return path.basename(filePath, '.pdf')
 })
+
+ipcMain.handle(
+  'move-and-rename',
+  async (_, oldPath: string, folderPath: string, subfolder: string, newName: string) => {
+    try {
+      const newPath = path.join(folderPath, subfolder, `${newName}.pdf`)
+
+      // Ensure target directory exists (should already, but safe)
+      const targetDir = path.dirname(newPath)
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true })
+      }
+
+      fs.renameSync(oldPath, newPath)
+      return { success: true, newPath }
+    } catch (err: any) {
+      console.error('Failed to move file:', err)
+      return { success: false, error: err.message }
+    }
+  }
+)

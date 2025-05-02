@@ -67,12 +67,28 @@ export const App = () => {
     loadLastFolder()
   }, [])
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!folderPath || !pdfs[current]) return
+
     const originalPath = pdfs[current]
-    const newPath = `${folderPath}\\${targetFolder}\\${newName}.pdf`
-    console.log('Should move:', originalPath)
-    console.log('To:', newPath)
-    // ⏳ Replace with actual IPC call to move the file in main.ts
+
+    const result = await window.electronAPI.moveAndRename(
+      originalPath,
+      folderPath,
+      targetFolder,
+      newName
+    )
+
+    if (result.success) {
+      // Move to next file
+      const updated = [...pdfs]
+      updated.splice(current, 1) // remove current file
+      setPdfs(updated)
+      setCurrent((prev) => Math.max(0, prev - 1))
+      setNewName('')
+    } else {
+      alert(`Failed to move: ${result.error}`)
+    }
   }
 
   return (

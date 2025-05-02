@@ -13,5 +13,11 @@ interface Window {
     getLastFolder: () => Promise<{ folderPath: string; pdfs: string[]; folders: string[] } | null>
     loadPdfBuffer: (filePath: string) => Promise<Uint8Array | null>
     getFilename: (filePath: string) => Promise<string>
+    moveAndRename: (
+      oldPath: string,
+      folderPath: string,
+      subfolder: string,
+      newName: string
+    ) => Promise<{ success: boolean; newPath?: string; error?: string }>
   }
 }
