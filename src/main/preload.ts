@@ -1,7 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import path from 'path'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   selectFolder: () => ipcRenderer.invoke('dialog:selectFolder'),
-  loadPdfBuffer: (filePath: string) => ipcRenderer.invoke('load-pdf-buffer', filePath),
   getLastFolder: () => ipcRenderer.invoke('get-last-folder'),
+  loadPdfBuffer: (filePath: string) => ipcRenderer.invoke('load-pdf-buffer', filePath),
+  getFilename: (filePath: string) => ipcRenderer.invoke('get-filename', filePath),
 })

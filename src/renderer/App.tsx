@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
+  Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
   TextField,
   Typography,
-  Paper,
-  Divider,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
 } from '@mui/material'
 import { PdfViewer } from './components/PdfViewer'
 
@@ -27,6 +27,17 @@ export const App = () => {
 
   const [newName, setNewName] = useState('')
   const [targetFolder, setTargetFolder] = useState('')
+
+  useEffect(() => {
+    const setFileName = async () => {
+      if (pdfs.length > 0 && pdfs[current]) {
+        const name = await window.electronAPI.getFilename(pdfs[current])
+        setNewName(name)
+      }
+    }
+
+    setFileName().then()
+  }, [current, pdfs])
 
   const handleSelectFolder = async () => {
     const result: FolderLoadResult | null = await window.electronAPI.selectFolder()
@@ -78,7 +89,7 @@ export const App = () => {
         {/* Sidebar Form */}
         <Box
           component={Paper}
-          width={320}
+          width="30%"
           p={2}
           display="flex"
           flexDirection="column"

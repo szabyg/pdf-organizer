@@ -10,7 +10,8 @@ declare module '*?worker' {
 interface Window {
   electronAPI: {
     selectFolder: () => Promise<{ folderPath: string; pdfs: string[]; folders: string[] } | null>
-    loadPdfBuffer: (filePath: string) => Promise<Uint8Array | null>
     getLastFolder: () => Promise<{ folderPath: string; pdfs: string[]; folders: string[] } | null>
+    loadPdfBuffer: (filePath: string) => Promise<Uint8Array | null>
+    getFilename: (filePath: string) => Promise<string>
   }
 }

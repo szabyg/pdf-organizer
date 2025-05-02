@@ -98,3 +98,7 @@ ipcMain.handle('load-pdf-buffer', async (_, filePath: string) => {
     return null
   }
 })
+
+ipcMain.handle('get-filename', (_, filePath: string) => {
+  return path.basename(filePath, '.pdf')
+})
