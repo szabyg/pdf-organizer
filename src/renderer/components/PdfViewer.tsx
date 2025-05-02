@@ -15,7 +15,14 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ filePath }) => {
 
   useEffect(() => {
     const renderPDF = async () => {
-      const pdf = await getDocument(filePath).promise
+      const buffer = await window.electronAPI.loadPdfBuffer(filePath)
+      if (!buffer) {
+        console.error('Failed to load buffer for:', filePath)
+        return
+      }
+
+      const loadingTask = getDocument({ data: buffer })
+      const pdf = await loadingTask.promise
       const page = await pdf.getPage(1)
 
       const viewport = page.getViewport({ scale: 1.5 })
