@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Box, Button, Paper, Typography } from '@mui/material'
 import { PdfViewer } from './components/PdfViewer'
+import { PdfNavigationControls } from './components/PdfNavigationControls'
+import { FileRenameForm } from './components/FileRenameForm'
 import { getDocument } from 'pdfjs-dist'
 
 type FolderLoadResult = {
@@ -151,70 +142,25 @@ export const App = () => {
         >
           {pdfs.length > 0 && (
             <>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="subtitle1">
-                  File {current + 1} of {pdfs.length}
-                </Typography>
-                <Box display="flex" gap={1}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setCurrent((c) => Math.max(0, c - 1))}
-                    disabled={current === 0}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setCurrent((c) => Math.min(pdfs.length - 1, c + 1))}
-                    disabled={current >= pdfs.length - 1}
-                  >
-                    Next
-                  </Button>
-                </Box>
-              </Box>
-
-              <TextField
-                label="New File Name"
-                fullWidth
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
+              <PdfNavigationControls
+                current={current}
+                total={pdfs.length}
+                onPrevious={() => setCurrent((c) => Math.max(0, c - 1))}
+                onNext={() => setCurrent((c) => Math.min(pdfs.length - 1, c + 1))}
               />
 
-              <FormControl fullWidth>
-                <InputLabel id="target-folder-label">Target Folder</InputLabel>
-                <Select
-                  labelId="target-folder-label"
-                  value={targetFolder}
-                  onChange={(e) => setTargetFolder(e.target.value)}
-                  label="Target Folder"
-                >
-                  {subfolders.map((folder) => (
-                    <MenuItem key={folder} value={folder}>
-                      {folder}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <FileRenameForm
+                newName={newName}
+                targetFolder={targetFolder}
+                subfolders={subfolders}
+                onNameChange={setNewName}
+                onFolderChange={setTargetFolder}
+                onSubmit={handleSubmit}
+                onDelete={handleDelete}
+                disableSubmit={!newName || !targetFolder}
+                disableDelete={pdfs.length === 0}
+              />
 
-              <Divider />
-
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={!newName || !targetFolder}
-              >
-                Rename & Move
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleDelete}
-                disabled={pdfs.length === 0}
-              >
-                Delete
-              </Button>
               {pageCount && (
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="body2">
