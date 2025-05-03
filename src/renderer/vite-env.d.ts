@@ -19,5 +19,6 @@ interface Window {
       subfolder: string,
       newName: string
     ) => Promise<{ success: boolean; newPath?: string; error?: string }>
+    deleteFile: (filePath: string) => Promise<{ success: boolean; error?: string }>
   }
 }

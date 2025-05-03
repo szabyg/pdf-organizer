@@ -109,6 +109,24 @@ export const App = () => {
     }
   }
 
+  const handleDelete = async () => {
+    if (!pdfs[current]) return
+
+    const confirmed = window.confirm('Are you sure you want to delete this file?')
+    if (!confirmed) return
+
+    const result = await window.electronAPI.deleteFile(pdfs[current])
+    if (result.success) {
+      const updated = [...pdfs]
+      updated.splice(current, 1) // remove current file
+      setPdfs(updated)
+      setCurrent((prev) => Math.max(0, prev - 1))
+      setNewName('')
+    } else {
+      alert(`Failed to delete: ${result.error}`)
+    }
+  }
+
   return (
     <Box display="flex" flexDirection="column" height="100vh">
       {/* Top Bar */}
@@ -188,6 +206,14 @@ export const App = () => {
                 disabled={!newName || !targetFolder}
               >
                 Rename & Move
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleDelete}
+                disabled={pdfs.length === 0}
+              >
+                Delete
               </Button>
               {pageCount && (
                 <Box display="flex" justifyContent="space-between" alignItems="center">

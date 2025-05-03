@@ -123,3 +123,16 @@ ipcMain.handle(
     }
   }
 )
+
+ipcMain.handle('delete-file', async (_, filePath: string) => {
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+      return { success: true }
+    }
+    return { success: false, error: 'File does not exist' }
+  } catch (err: any) {
+    console.error('Failed to delete file:', err)
+    return { success: false, error: err.message }
+  }
+})

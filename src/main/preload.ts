@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getFilename: (filePath: string) => ipcRenderer.invoke('get-filename', filePath),
   moveAndRename: (oldPath: string, folderPath: string, subfolder: string, newName: string) =>
     ipcRenderer.invoke('move-and-rename', oldPath, folderPath, subfolder, newName),
+  deleteFile: (filePath: string) => ipcRenderer.invoke('delete-file', filePath),
 })
