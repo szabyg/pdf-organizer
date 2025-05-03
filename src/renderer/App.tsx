@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Button, Paper, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { PdfViewer } from './components/PdfViewer'
-import { PdfNavigationControls } from './components/PdfNavigationControls'
-import { FileRenameForm } from './components/FileRenameForm'
+import { Sidebar } from './components/Sidebar'
 import { getDocument } from 'pdfjs-dist'
 
 type FolderLoadResult = {
@@ -129,64 +128,24 @@ export const App = () => {
 
       {/* Main Layout */}
       <Box display="flex" flex="1" overflow="hidden">
-        {/* Sidebar Form */}
-        <Box
-          component={Paper}
-          width="30%"
-          p={2}
-          display="flex"
-          flexDirection="column"
-          gap={2}
-          borderRight={1}
-          borderColor="divider"
-        >
-          {pdfs.length > 0 && (
-            <>
-              <PdfNavigationControls
-                current={current}
-                total={pdfs.length}
-                onPrevious={() => setCurrent((c) => Math.max(0, c - 1))}
-                onNext={() => setCurrent((c) => Math.min(pdfs.length - 1, c + 1))}
-              />
-
-              <FileRenameForm
-                newName={newName}
-                targetFolder={targetFolder}
-                subfolders={subfolders}
-                onNameChange={setNewName}
-                onFolderChange={setTargetFolder}
-                onSubmit={handleSubmit}
-                onDelete={handleDelete}
-                disableSubmit={!newName || !targetFolder}
-                disableDelete={pdfs.length === 0}
-              />
-
-              {pageCount && (
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2">
-                    Page {pdfPage} of {pageCount}
-                  </Typography>
-                  <Box display="flex" gap={1}>
-                    <Button
-                      size="small"
-                      onClick={() => setPdfPage((p) => Math.max(1, p - 1))}
-                      disabled={pdfPage <= 1}
-                    >
-                      Prev Page
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={() => setPdfPage((p) => Math.min(pageCount, p + 1))}
-                      disabled={pdfPage >= pageCount}
-                    >
-                      Next Page
-                    </Button>
-                  </Box>
-                </Box>
-              )}
-            </>
-          )}
-        </Box>
+        {/* Sidebar */}
+        <Sidebar
+          pdfs={pdfs}
+          current={current}
+          subfolders={subfolders}
+          newName={newName}
+          targetFolder={targetFolder}
+          pageCount={pageCount}
+          pdfPage={pdfPage}
+          onPreviousFile={() => setCurrent((c) => Math.max(0, c - 1))}
+          onNextFile={() => setCurrent((c) => Math.min(pdfs.length - 1, c + 1))}
+          onNameChange={setNewName}
+          onFolderChange={setTargetFolder}
+          onSubmit={handleSubmit}
+          onDelete={handleDelete}
+          onPreviousPage={() => setPdfPage((p) => Math.max(1, p - 1))}
+          onNextPage={() => setPdfPage((p) => Math.min(pageCount || 1, p + 1))}
+        />
 
         {/* PDF Viewer Panel */}
         <Box flex={1} overflow="auto" p={2}>
