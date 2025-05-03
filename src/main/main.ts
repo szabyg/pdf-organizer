@@ -55,8 +55,12 @@ ipcMain.handle('dialog:selectFolder', async () => {
   const pdfs = entries
     .filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.pdf'))
     .map((e) => path.join(selectedPath, e.name))
+    .sort()
 
-  const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name)
+  const folders = entries
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort()
 
   return {
     folderPath: selectedPath,
@@ -74,8 +78,12 @@ ipcMain.handle('get-last-folder', async () => {
   const pdfs = entries
     .filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.pdf'))
     .map((e) => path.join(lastPath, e.name))
+    .sort() // Sort PDFs alphabetically
 
-  const folders = entries.filter((e) => e.isDirectory()).map((e) => e.name)
+  const folders = entries
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort() // Sort folders alphabetically
 
   return {
     folderPath: lastPath,
