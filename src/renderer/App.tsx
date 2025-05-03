@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { PdfViewer } from './components/PdfViewer'
+import { getDocument } from 'pdfjs-dist'
 
 type FolderLoadResult = {
   folderPath: string
@@ -28,6 +29,9 @@ export const App = () => {
   const [newName, setNewName] = useState('')
   const [targetFolder, setTargetFolder] = useState('')
 
+  const [pdfPage, setPdfPage] = useState(1)
+  const [pageCount, setPageCount] = useState<number | null>(null)
+
   useEffect(() => {
     const setFileName = async () => {
       if (pdfs.length > 0 && pdfs[current]) {
@@ -38,6 +42,20 @@ export const App = () => {
 
     setFileName().then()
   }, [current, pdfs])
+
+  useEffect(() => {
+    const fetchPageCount = async () => {
+      if (pdfs.length > 0 && pdfs[current]) {
+        const buffer = await window.electronAPI.loadPdfBuffer(pdfs[current])
+        if (!buffer) return
+        const pdf = await getDocument({ data: buffer }).promise
+        setPageCount(pdf.numPages)
+        setPdfPage(1) // reset page on file change
+      }
+    }
+
+    fetchPageCount().catch(console.error)
+  }, [pdfs, current])
 
   const handleSelectFolder = async () => {
     const result: FolderLoadResult | null = await window.electronAPI.selectFolder()
@@ -171,6 +189,29 @@ export const App = () => {
               >
                 Rename & Move
               </Button>
+              {pageCount && (
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body2">
+                    Page {pdfPage} of {pageCount}
+                  </Typography>
+                  <Box display="flex" gap={1}>
+                    <Button
+                      size="small"
+                      onClick={() => setPdfPage((p) => Math.max(1, p - 1))}
+                      disabled={pdfPage <= 1}
+                    >
+                      Prev Page
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => setPdfPage((p) => Math.min(pageCount, p + 1))}
+                      disabled={pdfPage >= pageCount}
+                    >
+                      Next Page
+                    </Button>
+                  </Box>
+                </Box>
+              )}
             </>
           )}
         </Box>
@@ -178,7 +219,7 @@ export const App = () => {
         {/* PDF Viewer Panel */}
         <Box flex={1} overflow="auto" p={2}>
           {pdfs.length > 0 ? (
-            <PdfViewer filePath={pdfs[current]} />
+            <PdfViewer filePath={pdfs[current]} pageNumber={pdfPage} />
           ) : (
             <Typography variant="body1">No PDF selected.</Typography>
           )}

@@ -8,23 +8,21 @@ GlobalWorkerOptions.workerSrc =
 
 export interface PdfViewerProps {
   filePath: string
+  pageNumber: number
 }
 
-export const PdfViewer: React.FC<PdfViewerProps> = ({ filePath }) => {
+export const PdfViewer: React.FC<PdfViewerProps> = ({ filePath, pageNumber }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const renderPDF = async () => {
       const buffer = await window.electronAPI.loadPdfBuffer(filePath)
-      if (!buffer) {
-        console.error('Failed to load buffer for:', filePath)
-        return
-      }
+      if (!buffer) return
 
       const loadingTask = getDocument({ data: buffer })
       const pdf = await loadingTask.promise
-      const page = await pdf.getPage(1)
 
+      const page = await pdf.getPage(pageNumber)
       const viewport = page.getViewport({ scale: 1.5 })
       const canvas = canvasRef.current
       if (!canvas) return
@@ -33,16 +31,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ filePath }) => {
       canvas.height = viewport.height
       canvas.width = viewport.width
 
-      const renderContext = {
-        canvasContext: context,
-        viewport,
-      }
-
-      await page.render(renderContext).promise
+      await page.render({ canvasContext: context, viewport }).promise
     }
 
     renderPDF().catch(console.error)
-  }, [filePath])
+  }, [filePath, pageNumber])
 
   return <canvas ref={canvasRef} />
 }
