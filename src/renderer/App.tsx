@@ -120,10 +120,15 @@ export const App = () => {
   return (
     <Box display="flex" flexDirection="column" height="100vh">
       {/* Top Bar */}
-      <Box p={2} borderBottom={1} borderColor="divider">
+      <Box p={2} borderBottom={1} borderColor="divider" display="flex" alignItems="center">
         <Button variant="contained" onClick={handleSelectFolder}>
           Select Folder
         </Button>
+        {folderPath && (
+          <Typography variant="body2" ml={2} color="textSecondary">
+            Current Folder: {folderPath}
+          </Typography>
+        )}
       </Box>
 
       {/* Main Layout */}
