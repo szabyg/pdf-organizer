@@ -3,11 +3,12 @@ import {
   Box,
   Button,
   Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
   TextField,
+  Typography,
 } from '@mui/material'
 
 interface FileRenameFormProps {
@@ -49,21 +50,19 @@ export const FileRenameForm: React.FC<FileRenameFormProps> = ({
         onChange={(e) => onNameChange(e.target.value)}
       />
 
-      <FormControl fullWidth>
-        <InputLabel id="target-folder-label">Target Folder</InputLabel>
-        <Select
-          labelId="target-folder-label"
-          value={targetFolder}
-          onChange={(e) => onFolderChange(e.target.value)}
-          label="Target Folder"
-        >
-          {subfolders.map((folder) => (
-            <MenuItem key={folder} value={folder}>
-              {folder}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Typography variant="subtitle1">Select target folder</Typography>
+      <List>
+        {subfolders.map((folder) => (
+          <ListItem key={folder} disablePadding>
+            <ListItemButton
+              selected={folder === targetFolder}
+              onClick={() => onFolderChange(folder)}
+            >
+              <ListItemText primary={folder} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
 
       <Divider />
 
