@@ -115,14 +115,25 @@ ipcMain.handle(
   'move-and-rename',
   async (_, oldPath: string, folderPath: string, subfolder: string, newName: string) => {
     try {
-      const newPath = path.join(folderPath, subfolder, `${newName}.pdf`)
+      // Extract the year from the filename
+      const yearMatch = newName.match(/^\d{4}/)
+      if (!yearMatch) {
+        throw new Error('Invalid filename format. Year could not be determined.')
+      }
+      const year = yearMatch[0]
 
-      // Ensure target directory exists (should already, but safe)
-      const targetDir = path.dirname(newPath)
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true })
+      // Create the year-based subfolder path
+      const yearFolderPath = path.join(folderPath, subfolder, year)
+
+      // Ensure the year-based subfolder exists
+      if (!fs.existsSync(yearFolderPath)) {
+        fs.mkdirSync(yearFolderPath, { recursive: true })
       }
 
+      // Construct the new file path
+      const newPath = path.join(yearFolderPath, `${newName}.pdf`)
+
+      // Move and rename the file
       fs.renameSync(oldPath, newPath)
       return { success: true, newPath }
     } catch (err: any) {
