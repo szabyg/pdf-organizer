@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Button,
@@ -34,8 +34,15 @@ export const FileRenameForm: React.FC<FileRenameFormProps> = ({
   disableSubmit,
   disableDelete,
 }) => {
+  const [isValid, setIsValid] = useState(true)
+
+  useEffect(() => {
+    const regex = /^\d{4}\.\d{2}(\.\d{2})? .+$/ // Matches "YYYY.MM.DD Some subject"
+    setIsValid(regex.test(newName))
+  }, [newName])
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === 'Enter' && !disableSubmit) {
+    if (e.key === 'Enter' && !disableSubmit && isValid) {
       e.preventDefault()
       onSubmit()
     }
@@ -48,6 +55,8 @@ export const FileRenameForm: React.FC<FileRenameFormProps> = ({
         fullWidth
         value={newName}
         onChange={(e) => onNameChange(e.target.value)}
+        error={!isValid}
+        helperText={!isValid ? 'Invalid format. Use "YYYY.MM.DD Some subject".' : ''}
       />
 
       <Typography variant="subtitle1">Select target folder</Typography>
@@ -66,7 +75,7 @@ export const FileRenameForm: React.FC<FileRenameFormProps> = ({
 
       <Divider />
 
-      <Button variant="contained" onClick={onSubmit} disabled={disableSubmit}>
+      <Button variant="contained" onClick={onSubmit} disabled={disableSubmit || !isValid}>
         Rename & Move
       </Button>
       <Button variant="outlined" color="error" onClick={onDelete} disabled={disableDelete}>
